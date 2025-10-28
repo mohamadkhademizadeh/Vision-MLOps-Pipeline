@@ -1,0 +1,20 @@
+train:
+  epochs: 30
+  imgsz: 640
+  batch: 8
+  weights: yolov8n.pt
+  patience: 10
+  lr0: 0.01
+  lrf: 0.01
+data:
+  classes:
+    0: part
+    1: defect
+  train_dir: data/images/train
+  val_dir: data/images/val
+  labels_train: data/labels/train
+  labels_val: data/labels/val
+export:
+  onnx_path: models/yolov8.onnx
+serve:
+  triton_repo: src/serve/triton_model_repo/yolov8

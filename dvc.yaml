@@ -1,0 +1,39 @@
+stages:
+  prepare:
+    cmd: python scripts/prepare_yolo_yaml.py --params params.yaml --out scripts/yolo_data.yaml
+    deps:
+      - scripts/prepare_yolo_yaml.py
+      - params.yaml
+    outs:
+      - scripts/yolo_data.yaml
+  train:
+    cmd: python src/training/train.py --data scripts/yolo_data.yaml --params params.yaml --out_dir models
+    deps:
+      - src/training/train.py
+      - scripts/yolo_data.yaml
+      - params.yaml
+      - data
+    outs:
+      - models
+  evaluate:
+    cmd: python src/eval/evaluate.py --runs runs/detect --out reports
+    deps:
+      - src/eval/evaluate.py
+      - models
+    outs:
+      - reports
+  export:
+    cmd: python scripts/export_onnx.py --weights models/best.pt --onnx models/yolov8.onnx
+    deps:
+      - scripts/export_onnx.py
+      - models
+    outs:
+      - models/yolov8.onnx
+  package_triton:
+    cmd: python src/serve/triton_model_repo/yolov8/model.py --pack --onnx models/yolov8.onnx --repo src/serve/triton_model_repo/yolov8
+    deps:
+      - src/serve/triton_model_repo/yolov8/model.py
+      - models/yolov8.onnx
+    outs:
+      - src/serve/triton_model_repo/yolov8/1/model.onnx
+      - src/serve/triton_model_repo/yolov8/config.pbtxt
